@@ -141,7 +141,7 @@ source venv/bin/activate
 venv\Scripts\activate
 ```
 
-1. Install dependencies:
+2. Install dependencies:
 
 Install the required Python packages (Flask, Google Generative AI SDK, Requests)
 
@@ -149,7 +149,7 @@ Install the required Python packages (Flask, Google Generative AI SDK, Requests)
 pip install -r requirements.txt
 ```
 
-1. Configure Environment Variables
+3. Configure Environment Variables
 
 Create a file named **.env** in the root directory. Add your API keys for Google Gemini and Back4App.
 
@@ -164,11 +164,11 @@ PARSE_REST_API_KEY=your_back4app_rest_api_key
 PARSE_SERVER_URL=https://parseapi.back4app.com/parse
 ```
 
-1. Run the Server
+4. Run the Server
 
 ```bash
 python3 run.py
 ```
 
 You should see the following output indicating the server is running:
- *** Running on http://127.0.0.1:5000**
+ *** Running on http://127.0.0.1:5000 ***
