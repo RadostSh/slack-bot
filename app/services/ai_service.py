@@ -1,7 +1,11 @@
 import json
+import logging
+import re
 import google.generativeai as genai
 from app.config import Config
 from app.models.incident import IncidentResponse
+
+logger = logging.getLogger(__name__)
 
 
 def get_incident_response_schema() -> dict:
@@ -83,9 +87,42 @@ Ensure both messages are distinct and appropriate for their respective audiences
                 generation_config=generation_config
             )
             
-            # Parse structured JSON response
-            content = response.text.strip()
-            parsed = json.loads(content)
+            # Extract content from response
+            # Try multiple methods to get the text content
+            content = None
+            if hasattr(response, 'text') and response.text:
+                content = response.text.strip()
+            elif hasattr(response, 'candidates') and response.candidates:
+                # Fallback: try to get text from candidates
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    text_parts = [part.text for part in candidate.content.parts if hasattr(part, 'text') and part.text]
+                    content = ' '.join(text_parts).strip()
+            
+            if not content:
+                raise Exception("No content received from Gemini API")
+            
+            # Try to extract JSON from markdown code blocks if present
+            json_match = re.search(r'```(?:json)?\s*(\{.*\})\s*```', content, re.DOTALL)
+            if json_match:
+                content = json_match.group(1).strip()
+            
+            # Parse JSON response
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError as e:
+                # Log the raw content for debugging (full content for analysis)
+                logger.error(f"Failed to parse JSON response. Error: {str(e)}")
+                logger.error(f"Error position: line {e.lineno}, column {e.colno}, char {e.pos}")
+                logger.error(f"Raw content (first 1000 chars): {content[:1000]}")
+                if len(content) > 1000:
+                    logger.error(f"Raw content (last 500 chars): {content[-500:]}")
+                # Log content around the error position if available
+                if hasattr(e, 'pos') and e.pos and e.pos < len(content):
+                    start = max(0, e.pos - 100)
+                    end = min(len(content), e.pos + 100)
+                    logger.error(f"Content around error position: {content[start:end]}")
+                raise Exception(f"Failed to parse structured JSON response: {str(e)}")
             
             customer_message = parsed.get("customerMessage", "")
             internal_message = parsed.get("internalMessage", "")
@@ -98,9 +135,10 @@ Ensure both messages are distinct and appropriate for their respective audiences
                 internalMessage=internal_message
             )
                 
-        except json.JSONDecodeError as e:
-            raise Exception(f"Failed to parse structured JSON response: {str(e)}")
         except Exception as e:
+            # Re-raise if it's already our formatted exception
+            if isinstance(e, Exception) and "Failed to parse structured JSON response" in str(e):
+                raise
             raise Exception(f"Gemini API error: {str(e)}")
 
 
