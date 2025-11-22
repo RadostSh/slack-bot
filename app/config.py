@@ -11,11 +11,11 @@ class Config:
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.5-pro')
     
-    # Parse Server/SashiDo Configuration
+    # Parse Server/Back4App Configuration
     PARSE_APPLICATION_ID = os.getenv('PARSE_APPLICATION_ID')
     PARSE_REST_API_KEY = os.getenv('PARSE_REST_API_KEY')
     PARSE_SERVER_URL = os.getenv('PARSE_SERVER_URL')
-    SASHIDO_INCIDENT_CLASS = 'IncidentMessage'
+    BACK4APP_INCIDENT_CLASS = 'IncidentMessage'
     
     # Flask Configuration
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')

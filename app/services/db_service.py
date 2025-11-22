@@ -3,7 +3,7 @@ from app.config import Config
 
 
 class DatabaseService:
-    """Service for interacting with Parse Server/SashiDo."""
+    """Service for interacting with Parse Server/Back4App."""
     
     def __init__(self):
         """Initialize Parse Server connection."""
@@ -33,7 +33,7 @@ class DatabaseService:
         Returns:
             Object ID of the saved record
         """
-        url = f"{self.server_url}/classes/{Config.SASHIDO_INCIDENT_CLASS}"
+        url = f"{self.server_url}/classes/{Config.BACK4APP_INCIDENT_CLASS}"
         
         headers = {
             "X-Parse-Application-Id": self.app_id,
